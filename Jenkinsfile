@@ -1,29 +1,29 @@
 pipeline{
-    agent any
+    agent {label "dev"}
     
     stages{
         stage("Code cloned"){
             steps{
-                git url: "https://github.com/ManishNegi963/node-todo-cicd.git" ,branch: "master"
+                git url: "https://github.com/ManishNegi963/node-todo-cicd.git", branch: "master"
             }
         }
         stage("Code build"){
             steps{
-               sh "docker build . -t node-todo-app1:latest"
+                sh  "docker build . -t node-app-agent"
             }
         }
-        stage("Code push"){
+        stage("Code pushed to docker"){
             steps{
-                withCredentials([usernamePassword(credentialsId:"DockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                    sh "docker tag node-todo-app  ${env.dockerHubUser}/node-todo-app1:latest"
-                    sh "docker push ${env.dockerHubUser}/node-todo-app1:latest"
-                }
+               withCredentials([usernamePassword(credentialsId:"Docker-hub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
+                   sh "docker login -u ${dockerHubUser} -p ${dockerHubPass}"
+                   sh "docker tag node-app-agent ${dockerHubUser}/node-app-agent"
+                   sh "docker push ${dockerHubUser}/node-app-agent"
+               }
             }
         }
-        stage("Code deploy"){
+        stage("Code deployed"){
             steps{
-               sh "docker-compose down && docker-compose up -d"
+                sh "docker-compose down && docker-compose up -d"
             }
         }
     }
